@@ -1,13 +1,8 @@
-#[derive(Debug, Clone)]
-pub enum Suit {
-    Spades,
-    Hearts,
-    Diamonds,
-    Clubs,
-}
+use std::fmt::{Debug, Display, Formatter};
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Rank {
+enum Rank {
     Ace,
     Two,
     Three,
@@ -23,111 +18,243 @@ pub enum Rank {
     King,
 }
 
-#[derive(Debug)]
-pub struct Card {
-    pub rank: Rank,
-    pub suit: Suit,
+impl FromStr for Rank {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "A" => Ok(Rank::Ace),
+            "2" => Ok(Rank::Two),
+            "3" => Ok(Rank::Three),
+            "4" => Ok(Rank::Four),
+            "5" => Ok(Rank::Five),
+            "6" => Ok(Rank::Six),
+            "7" => Ok(Rank::Seven),
+            "8" => Ok(Rank::Eight),
+            "9" => Ok(Rank::Nine),
+            "T" => Ok(Rank::Ten),
+            "J" => Ok(Rank::Jack),
+            "Q" => Ok(Rank::Queen),
+            "K" => Ok(Rank::King),
+            _ => Err(format!("Invalid rank: {}", s)),
+        }
+    }
+}
+
+impl Display for Rank {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Rank::Ace => write!(f, "A"),
+            Rank::Two => write!(f, "2"),
+            Rank::Three => write!(f, "3"),
+            Rank::Four => write!(f, "4"),
+            Rank::Five => write!(f, "5"),
+            Rank::Six => write!(f, "6"),
+            Rank::Seven => write!(f, "7"),
+            Rank::Eight => write!(f, "8"),
+            Rank::Nine => write!(f, "9"),
+            Rank::Ten => write!(f, "T"),
+            Rank::Jack => write!(f, "J"),
+            Rank::Queen => write!(f, "Q"),
+            Rank::King => write!(f, "K"),
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum TablePosition {
+enum TablePosition {
     Early,
     Middle,
     Late,
 }
 
-#[derive(Debug)]
-pub enum Action {
+impl FromStr for TablePosition {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "early" => Ok(TablePosition::Early),
+            "middle" => Ok(TablePosition::Middle),
+            "late" => Ok(TablePosition::Late),
+            _ => Err(format!("Invalid table position: {}", s)),
+        }
+    }
+}
+
+impl Display for TablePosition {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TablePosition::Early => write!(f, "early"),
+            TablePosition::Middle => write!(f, "middle"),
+            TablePosition::Late => write!(f, "late"),
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum Action {
     Raise(StackSize),
     Call,
     Fold,
 }
 
-#[derive(Debug, Clone)]
+impl FromStr for Action {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "r" => Ok(Action::Raise(StackSize::Short)),
+            "f" => Ok(Action::Fold),
+            "c" => Ok(Action::Call),
+            _ => Err(format!("Invalid action: {}", s)),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum StackSize {
     Short,
     Medium,
     Deep,
+    Any,
+}
+
+impl FromStr for StackSize {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "s" => Ok(StackSize::Short),
+            "m" => Ok(StackSize::Medium),
+            "d" => Ok(StackSize::Deep),
+            "a" => Ok(StackSize::Any),
+            _ => Err(format!("Invalid stack size: {}", s)),
+        }
+    }
+}
+
+impl Display for StackSize {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StackSize::Short => write!(f, "short"),
+            StackSize::Medium => write!(f, "medium"),
+            StackSize::Deep => write!(f, "deep"),
+            StackSize::Any => write!(f, "any"),
+        }
+    }
 }
 
 #[derive(Debug)]
-pub struct Hand {
-    pub cards: Vec<Card>,
+enum SuitCombination {
+    Suited,
+    Offsuit,
 }
-#[derive(Debug, Eq, PartialEq)]
-pub enum HandStrength {
-    EF0,
-    EF1,
-    EF2,
+
+impl FromStr for SuitCombination {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "s" => Ok(SuitCombination::Suited),
+            "o" => Ok(SuitCombination::Offsuit),
+            _ => Err(format!("Invalid suit combination: {}", s)),
+        }
+    }
+}
+
+impl Display for SuitCombination {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SuitCombination::Offsuit => write!(f, "offsuit"),
+            SuitCombination::Suited => write!(f, "suited"),
+        }
+    }
 }
 
 #[derive(Debug)]
-pub struct Player {
-    position: TablePosition,
-    hand: Hand,
+pub struct Context {
+    table_position: TablePosition,
+    card_1: Rank,
+    card_2: Rank,
+    suit_combination: SuitCombination,
+    action: Action,
     stack_size: StackSize,
 }
 
-impl Player {
-    pub fn new(position: TablePosition, hand: Hand, stack_size: StackSize) -> Player {
-        Player {
-            position,
-            hand,
+impl Context {
+    pub fn assess(&self, action: &str) -> bool {
+        let action: Action = match action.trim().parse() {
+            Ok(action) => action,
+            Err(_) => return false,
+        };
+
+        self.action == action
+    }
+    pub fn get_expected_action(&self) -> &str {
+        match self.action {
+            Action::Raise(_) => "raise",
+            Action::Call => "call",
+            Action::Fold => "fold",
+        }
+    }
+}
+
+impl FromStr for Context {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+        if parts.len() != 6 {
+            return Err("Invalid string format".to_string());
+        }
+
+        let table_position: TablePosition = match parts[0].trim().parse() {
+            Ok(position) => position,
+            Err(e) => return Err(e),
+        };
+
+        let card_1: Rank = match parts[1].trim().parse() {
+            Ok(rank) => rank,
+            Err(e) => return Err(e),
+        };
+
+        let card_2: Rank = match parts[2].trim().parse() {
+            Ok(rank) => rank,
+            Err(e) => return Err(e),
+        };
+
+        let suit_combination: SuitCombination = match parts[3].trim().parse() {
+            Ok(suit) => suit,
+            Err(e) => return Err(e),
+        };
+
+        let action: Action = match parts[4].trim().parse() {
+            Ok(action) => action,
+            Err(e) => return Err(e),
+        };
+
+        let stack_size: StackSize = match parts[5].trim().parse() {
+            Ok(size) => size,
+            Err(e) => return Err(e),
+        };
+
+        Ok(Context {
+            table_position,
+            card_1,
+            card_2,
+            suit_combination,
+            action,
             stack_size,
-        }
+        })
     }
+}
 
-    pub fn evaluate_hand(&self) -> HandStrength {
-        // Placeholder algorithm.
-        let rank1 = self.hand.cards[0].rank.to_owned();
-        let rank2 = self.hand.cards[1].rank.to_owned();
-
-        if rank1 == Rank::Eight && rank2 == Rank::Eight && self.position == TablePosition::Early {
-            HandStrength::EF0
-        } else {
-            HandStrength::EF1
-        }
-    }
-
-    pub fn act(&self, opponent_action: Action) -> Action {
-        let hand_strength = self.evaluate_hand();
-
-        // Placeholder algorithm.
-        match self.position {
-            TablePosition::Early => {
-                if hand_strength == HandStrength::EF2 {
-                    match opponent_action {
-                        Action::Raise(_) => Action::Fold,
-                        _ => Action::Raise(self.stack_size.to_owned()),
-                    }
-                } else {
-                    Action::Fold
-                }
-            }
-            TablePosition::Middle => {
-                if hand_strength == HandStrength::EF0 {
-                    match opponent_action {
-                        Action::Raise(_) => Action::Fold,
-                        _ => Action::Raise(self.stack_size.to_owned()),
-                    }
-                } else if hand_strength == HandStrength::EF1 {
-                    Action::Call
-                } else {
-                    Action::Fold
-                }
-            }
-            TablePosition::Late => {
-                if hand_strength == HandStrength::EF0 {
-                    match opponent_action {
-                        Action::Raise(_) => Action::Fold,
-                        _ => Action::Raise(self.stack_size.to_owned()),
-                    }
-                } else if hand_strength == HandStrength::EF1 {
-                    Action::Call
-                } else {
-                    Action::Fold
-                }
-            }
-        }
+impl Display for Context {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} pos, {}{} {}, {} stack",
+            self.table_position, self.card_1, self.card_2, self.suit_combination, self.stack_size
+        )
     }
 }
