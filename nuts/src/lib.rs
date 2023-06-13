@@ -1,14 +1,34 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+pub struct Card {
+    rank: &'static str,
+    suit: &'static str,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub struct Cards {
+    deck: Vec<Card>,
+}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+impl Cards {
+    fn new() -> Cards {
+        // TODO: Add the rest of the deck.
+        let deck: Vec<Card> = vec![
+            Card {
+                rank: "A",
+                suit: "♠",
+            },
+            Card {
+                rank: "A",
+                suit: "♣",
+            },
+            Card {
+                rank: "A",
+                suit: "♦",
+            },
+            Card {
+                rank: "A",
+                suit: "♥",
+            },
+        ];
+
+        Cards { deck }
     }
 }
