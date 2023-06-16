@@ -38,9 +38,16 @@ dependencies = [
 name = "kata"
 version = "0.1.0"
 dependencies = [
+ "nuts",
  "preflop",
  "rand",
 ]
+
+[[package]]
+name = "lazy_static"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
@@ -53,6 +60,9 @@ name = "nuts"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "lazy_static",
+ "rand",
+ "utils",
 ]
 
 [[package]]
@@ -64,6 +74,9 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 [[package]]
 name = "preflop"
 version = "0.1.0"
+dependencies = [
+ "utils",
+]
 
 [[package]]
 name = "rand"
@@ -94,6 +107,10 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
 ]
+
+[[package]]
+name = "utils"
+version = "0.1.0"
 
 [[package]]
 name = "wasi"

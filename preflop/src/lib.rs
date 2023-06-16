@@ -1,66 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-enum Rank {
-    Ace,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Queen,
-    King,
-}
-
-impl FromStr for Rank {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "A" => Ok(Rank::Ace),
-            "2" => Ok(Rank::Two),
-            "3" => Ok(Rank::Three),
-            "4" => Ok(Rank::Four),
-            "5" => Ok(Rank::Five),
-            "6" => Ok(Rank::Six),
-            "7" => Ok(Rank::Seven),
-            "8" => Ok(Rank::Eight),
-            "9" => Ok(Rank::Nine),
-            "T" => Ok(Rank::Ten),
-            "J" => Ok(Rank::Jack),
-            "Q" => Ok(Rank::Queen),
-            "K" => Ok(Rank::King),
-            _ => Err(format!("Invalid rank: {}", s)),
-        }
-    }
-}
-
-impl Display for Rank {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Rank::Ace => write!(f, "A"),
-            Rank::Two => write!(f, "2"),
-            Rank::Three => write!(f, "3"),
-            Rank::Four => write!(f, "4"),
-            Rank::Five => write!(f, "5"),
-            Rank::Six => write!(f, "6"),
-            Rank::Seven => write!(f, "7"),
-            Rank::Eight => write!(f, "8"),
-            Rank::Nine => write!(f, "9"),
-            Rank::Ten => write!(f, "T"),
-            Rank::Jack => write!(f, "J"),
-            Rank::Queen => write!(f, "Q"),
-            Rank::King => write!(f, "K"),
-        }
-    }
-}
-
 #[derive(Debug, Eq, PartialEq)]
 enum TablePosition {
     Early,
@@ -174,8 +114,8 @@ impl Display for SuitCombination {
 #[derive(Debug)]
 pub struct Context {
     table_position: TablePosition,
-    card_1: Rank,
-    card_2: Rank,
+    card_1: utils::Rank,
+    card_2: utils::Rank,
     suit_combination: SuitCombination,
     action: Action,
     stack_size: StackSize,
@@ -213,12 +153,12 @@ impl FromStr for Context {
             Err(e) => return Err(e),
         };
 
-        let card_1: Rank = match parts[1].trim().parse() {
+        let card_1: utils::Rank = match parts[1].trim().parse() {
             Ok(rank) => rank,
             Err(e) => return Err(e),
         };
 
-        let card_2: Rank = match parts[2].trim().parse() {
+        let card_2: utils::Rank = match parts[2].trim().parse() {
             Ok(rank) => rank,
             Err(e) => return Err(e),
         };

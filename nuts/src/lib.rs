@@ -1,14 +1,39 @@
-use itertools::Itertools;
+use itertools::{Itertools, Tuples};
+use lazy_static::lazy_static;
+use rand::seq::SliceRandom;
+use std::collections::HashMap;
+use std::string::ToString;
+use utils::{Rank, Suit};
 
-const RANKS: [&'static str; 13] = [
-    "A", "K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2",
+const RANKS: [Rank; 13] = [
+    Rank::Ace,
+    Rank::King,
+    Rank::Queen,
+    Rank::Jack,
+    Rank::Ten,
+    Rank::Nine,
+    Rank::Eight,
+    Rank::Seven,
+    Rank::Six,
+    Rank::Five,
+    Rank::Four,
+    Rank::Three,
+    Rank::Two,
 ];
 
-const SUITS: [&'static str; 4] = ["♠", "♣", "♦", "♥"];
+lazy_static! {
+    static ref SUITS: [Suit; 4] = [
+        Suit::Clubs(String::from("♣")),
+        Suit::Diamonds("♦".to_string()),
+        Suit::Hearts("♥".to_string()),
+        Suit::Spades("♠".to_string()),
+    ];
+}
 
+#[derive(Eq, PartialEq, Clone)]
 pub struct Card {
-    rank: &'static str,
-    suit: &'static str,
+    rank: Rank,
+    suit: Suit,
 }
 
 pub struct Deck {
@@ -16,13 +41,58 @@ pub struct Deck {
 }
 
 impl Deck {
-    fn new() -> Deck {
+    pub fn new() -> Deck {
         let cards: Vec<Card> = RANKS
             .iter()
-            .cartesian_product(&SUITS)
-            .map(|(&rank, &suit)| Card { rank, suit })
+            .clone()
+            .cartesian_product(SUITS.iter())
+            .map(|(rank, suit)| Card {
+                rank: rank.clone(),
+                suit: suit.clone(),
+            })
             .collect();
 
         Deck { cards }
+    }
+
+    fn shuffle(self) -> Vec<Card> {
+        let mut rng = rand::thread_rng();
+        let mut shuffled_deck = self.cards.clone();
+        shuffled_deck.shuffle(&mut rng);
+        shuffled_deck[..5].to_vec()
+    }
+}
+
+enum HandRank {
+    HighCard(u32),
+    OnePair(u32),
+    TwoPair(u32),
+    ThreeOfAKind(u32),
+    Straight(u32),
+    Flush(u32),
+    FullHouse(u32),
+    FourOfAKind(u32),
+    StraightFlush(u32),
+    RoyalFlush,
+}
+
+struct Nuts {
+    hand: [Card; 5],
+    nuts: (Card, Card),
+}
+
+impl Nuts {
+    fn new(&mut self, hand: [Card; 5]) {
+        self.hand = hand;
+        self.nuts = self.evaluate_hand();
+    }
+
+    fn evaluate_hand(&self) -> (Card, Card) {
+        (self.hand[0].clone(), self.hand[1].clone())
+    }
+
+    fn is_nuts(&self, tuple: (Card, Card)) -> bool {
+        (tuple.0 == self.nuts.0 || tuple.0 == self.nuts.1)
+            && (tuple.1 == self.nuts.0 || tuple.1 == self.nuts.1)
     }
 }
