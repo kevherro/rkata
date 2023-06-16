@@ -2,7 +2,6 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use rand::seq::SliceRandom;
 
-
 use utils::{Rank, Suit};
 
 const RANKS: [Rank; 13] = [
@@ -36,13 +35,13 @@ pub struct Card {
     suit: Suit,
 }
 
-pub struct Deck {
+pub struct Hand {
     cards: Vec<Card>,
 }
 
-impl Deck {
-    pub fn new() -> Deck {
-        let cards: Vec<Card> = RANKS
+impl Hand {
+    pub fn new() -> Hand {
+        let mut deck: Vec<Card> = RANKS
             .iter()
             .clone()
             .cartesian_product(SUITS.iter())
@@ -52,14 +51,25 @@ impl Deck {
             })
             .collect();
 
-        Deck { cards }
+        deck.shuffle(&mut rand::thread_rng());
+
+        Hand {
+            cards: deck[..5].to_vec(),
+        }
     }
 
-    fn shuffle(self) -> Vec<Card> {
-        let mut rng = rand::thread_rng();
-        let mut shuffled_deck = self.cards.clone();
-        shuffled_deck.shuffle(&mut rng);
-        shuffled_deck[..5].to_vec()
+    pub fn is_nuts(&self, cards: (usize, usize)) -> bool {
+        let nuts = self.evaluate_hand();
+        match cards {
+            (card_1, card_2) if card_1 == nuts.0 => card_2 == nuts.1,
+            (card_1, card_2) if card_1 == nuts.1 => card_2 == nuts.0,
+            _ => false,
+        }
+    }
+
+    fn evaluate_hand(&self) -> (usize, usize) {
+        // TODO
+        (0, 0)
     }
 }
 
@@ -74,29 +84,4 @@ enum HandRank {
     FourOfAKind(u32),
     StraightFlush(u32),
     RoyalFlush,
-}
-
-struct Nuts {
-    hand: [Card; 5],
-    nuts: (Card, Card),
-}
-
-impl Nuts {
-    fn new(&mut self, hand: [Card; 5]) {
-        self.hand = hand;
-        self.nuts = self.evaluate_hand();
-    }
-
-    fn evaluate_hand(&self) -> (Card, Card) {
-        // TODO
-        (self.hand[0].clone(), self.hand[1].clone())
-    }
-
-    fn is_nuts(&self, tuple: (Card, Card)) -> bool {
-        match tuple {
-            (card_1, card_2) if card_1 == self.nuts.0 => card_2 == self.nuts.1,
-            (card_1, card_2) if card_1 == self.nuts.1 => card_2 == self.nuts.0,
-            _ => false,
-        }
-    }
 }

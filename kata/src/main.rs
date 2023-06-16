@@ -1,3 +1,4 @@
+use nuts::Hand;
 use preflop::Context;
 use rand::seq::SliceRandom;
 use std::fs::File;
@@ -50,4 +51,13 @@ fn parse_file(file_path: &str) -> Result<Vec<Context>, Box<dyn std::error::Error
         .collect();
 
     Ok(contexts)
+}
+
+fn nuts() {
+    loop {
+        let hand = Hand::new();
+        if hand.is_nuts((0, 0)) {
+            print!("correct")
+        }
+    }
 }
