@@ -24,9 +24,9 @@ const RANKS: [Rank; 13] = [
 lazy_static! {
     static ref SUITS: [Suit; 4] = [
         Suit::Clubs(String::from("♣")),
-        Suit::Diamonds("♦".to_string()),
-        Suit::Hearts("♥".to_string()),
-        Suit::Spades("♠".to_string()),
+        Suit::Diamonds(String::from("♦")),
+        Suit::Hearts(String::from("♥")),
+        Suit::Spades(String::from("♠")),
     ];
 }
 
@@ -88,11 +88,15 @@ impl Nuts {
     }
 
     fn evaluate_hand(&self) -> (Card, Card) {
+        // TODO
         (self.hand[0].clone(), self.hand[1].clone())
     }
 
     fn is_nuts(&self, tuple: (Card, Card)) -> bool {
-        (tuple.0 == self.nuts.0 || tuple.0 == self.nuts.1)
-            && (tuple.1 == self.nuts.0 || tuple.1 == self.nuts.1)
+        match tuple {
+            (card_1, card_2) if card_1 == self.nuts.0 => card_2 == self.nuts.1,
+            (card_1, card_2) if card_1 == self.nuts.1 => card_2 == self.nuts.0,
+            _ => false,
+        }
     }
 }
