@@ -1,8 +1,8 @@
-use itertools::{Itertools, Tuples};
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use rand::seq::SliceRandom;
-use std::collections::HashMap;
-use std::string::ToString;
+
+
 use utils::{Rank, Suit};
 
 const RANKS: [Rank; 13] = [
