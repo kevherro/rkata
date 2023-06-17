@@ -1,8 +1,9 @@
 [workspace]
 
 members = [
-    "kata",
+    "utils",
+    "fundamentals",
     "nuts",
     "preflop",
-    "utils",
+    "kata",
 ]
