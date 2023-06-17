@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
+use utils::rank::Rank;
 
 #[derive(Debug, Eq, PartialEq)]
 enum TablePosition {
@@ -114,8 +115,8 @@ impl Display for SuitCombination {
 #[derive(Debug)]
 pub struct Context {
     table_position: TablePosition,
-    card_1: utils::Rank,
-    card_2: utils::Rank,
+    card_1: Rank,
+    card_2: Rank,
     suit_combination: SuitCombination,
     action: Action,
     stack_size: StackSize,
@@ -153,12 +154,12 @@ impl FromStr for Context {
             Err(e) => return Err(e),
         };
 
-        let card_1: utils::Rank = match parts[1].trim().parse() {
+        let card_1: Rank = match parts[1].trim().parse() {
             Ok(rank) => rank,
             Err(e) => return Err(e),
         };
 
-        let card_2: utils::Rank = match parts[2].trim().parse() {
+        let card_2: Rank = match parts[2].trim().parse() {
             Ok(rank) => rank,
             Err(e) => return Err(e),
         };
