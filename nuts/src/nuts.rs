@@ -1,4 +1,4 @@
-use itertools::Itertools;
+use itertools::{iproduct, Itertools};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Card {
@@ -13,15 +13,10 @@ pub struct Hand {
 
 #[allow(dead_code)]
 pub fn find_nuts(community_cards: &[Card]) -> (HandRank, Hand) {
-    let mut deck: Vec<Card> = Vec::new();
-    for suit in 0..4 {
-        for rank in 2..15 {
-            let card = Card { rank, suit };
-            if !community_cards.contains(&card) {
-                deck.push(card);
-            }
-        }
-    }
+    let deck: Vec<Card> = iproduct!(0..4, 2..15)
+        .map(|(suit, rank)| Card { rank, suit })
+        .filter(|card| !community_cards.contains(card))
+        .collect();
 
     let unseen = deck.iter().combinations(2);
     let mut best_hand: Option<Hand> = None;
