@@ -64,8 +64,6 @@ name = "nuts"
 version = "0.1.0"
 dependencies = [
  "itertools",
- "rand",
- "utils",
 ]
 
 [[package]]
