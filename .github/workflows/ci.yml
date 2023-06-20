@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-run:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.69.0
+
+      - name: Build Project
+        run: cargo build --release
+
+      - name: Test Project
+        run: cargo test
+
