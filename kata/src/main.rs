@@ -1,53 +1,71 @@
-use preflop::Context;
-use rand::seq::SliceRandom;
-use std::fs::File;
+use clap::Parser;
+use nuts::HandRank;
+use std::collections::HashMap;
 use std::io;
-use std::io::{BufRead, BufReader, Write};
-use std::str::FromStr;
+
+#[derive(Parser, Debug)]
+struct Args {
+    #[arg(short, long)]
+    skill: String,
+}
 
 fn main() {
-    let file_path: &str = "src/data/opening_hands_and_defending_raises";
-    let mut contexts = match parse_file(file_path) {
-        Ok(contexts) => contexts,
-        Err(e) => {
-            println!("Error parsing file: {:?}", e);
-            return;
+    let args = Args::parse();
+
+    if args.skill == "nuts" {
+        nuts();
+    }
+}
+
+fn nuts() {
+    let hand_ranks: HashMap<usize, HandRank> = HashMap::from([
+        (0, HandRank::HighCard),
+        (1, HandRank::OnePair),
+        (2, HandRank::TwoPair),
+        (3, HandRank::ThreeOfAKind),
+        (4, HandRank::Straight),
+        (5, HandRank::Flush),
+        (6, HandRank::FullHouse),
+        (7, HandRank::FourOfAKind),
+        (8, HandRank::StraightFlush),
+        (9, HandRank::RoyalFlush),
+    ]);
+
+    loop {
+        let hand = nuts::Hand::random(5);
+        let cards = hand.cards.clone();
+        println!();
+        for card in cards {
+            print!("{card}\t");
         }
-    };
+        println!();
+        println!();
+        for (key, hand_rank) in &hand_ranks {
+            println!("[{key}] {hand_rank}");
+        }
 
-    let mut rng = rand::thread_rng();
-    contexts.shuffle(&mut rng);
+        let stdin = io::stdin();
+        let mut input = String::new();
+        stdin.read_line(&mut input).expect("Failed to read line");
 
-    for context in contexts.iter() {
-        assess(context);
+        let key: usize = match input.trim().parse() {
+            Ok(key) => key,
+            Err(_) => {
+                println!("Invalid input. Please enter a valid number");
+                return;
+            }
+        };
+
+        match hand_ranks.get(&key) {
+            Some(actual) => {
+                let community_cards = hand.cards.clone();
+                let expected = nuts::find_nuts(community_cards.as_slice());
+                assert_eq!(actual.clone(), expected.0);
+            }
+            None => println!("Invalid input. Please enter a valid number"),
+        };
+
+        println!();
         println!();
     }
-}
-
-fn assess(context: &Context) {
-    println!("{}", context);
-    print!("action: ");
-    io::stdout().flush().unwrap();
-
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
-
-    if context.assess(input.trim()) {
-        println!("correct");
-    } else {
-        println!("incorrect. want: {}", context.get_expected_action());
-    }
-}
-
-fn parse_file(file_path: &str) -> Result<Vec<Context>, Box<dyn std::error::Error>> {
-    let file = File::open(file_path)?;
-    let reader = BufReader::new(file);
-
-    let contexts = reader
-        .lines()
-        .map_while(Result::ok)
-        .filter_map(|line| Context::from_str(&line).ok())
-        .collect();
-
-    Ok(contexts)
 }
